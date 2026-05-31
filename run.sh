@@ -1178,11 +1178,11 @@ fi
 # Install Python Dependencies Based on Mode
 # ==========================================
 if [ "$SKIP_TELEGRAM" == "true" ]; then
-    PY_DEPS="flask flask-cors requests beautifulsoup4 python-dotenv gunicorn"
-    PY_IMPORT_CHECK="import flask, flask_cors, requests, bs4, dotenv, gunicorn"
+    PY_DEPS="flask flask-cors requests beautifulsoup4 gunicorn"
+    PY_IMPORT_CHECK="import flask, flask_cors, requests, bs4, gunicorn"
 else
-    PY_DEPS="flask flask-cors requests beautifulsoup4 python-telegram-bot python-dotenv gunicorn"
-    PY_IMPORT_CHECK="import flask, flask_cors, requests, bs4, telegram, dotenv, gunicorn"
+    PY_DEPS="flask flask-cors requests beautifulsoup4 python-telegram-bot gunicorn"
+    PY_IMPORT_CHECK="import flask, flask_cors, requests, bs4, telegram, gunicorn"
 fi
 
 # Check Python dependencies inside the virtualenv

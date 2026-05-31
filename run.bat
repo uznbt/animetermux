@@ -265,10 +265,11 @@ if "!SKIP_TELEGRAM!"=="true" (
 :: Install Python Dependencies Based on Mode
 :: =====================================================
 if "!SKIP_TELEGRAM!"=="true" (
-    !VENV_PYTHON! -c "import flask, flask_cors, requests, bs4, dotenv" >nul 2>&1
+    echo [*] Checking required Python dependencies...
+    !VENV_PYTHON! -c "import flask, flask_cors, requests, bs4" >nul 2>&1
     if errorlevel 1 (
-        echo [*] Dependensi Python belum lengkap. Menginstal...
-        !VENV_PIP! install flask flask-cors requests beautifulsoup4 python-dotenv
+        echo [*] Installing required Python dependencies...
+        !VENV_PIP! install flask flask-cors requests beautifulsoup4
         if errorlevel 1 (
             echo [-] Gagal menginstal dependensi Python!
             pause
@@ -277,10 +278,11 @@ if "!SKIP_TELEGRAM!"=="true" (
         echo [+] Dependensi Python berhasil diinstal!
     )
 ) else (
-    !VENV_PYTHON! -c "import flask, flask_cors, requests, bs4, telegram, dotenv" >nul 2>&1
+    echo [*] Checking required Python dependencies...
+    !VENV_PYTHON! -c "import flask, flask_cors, requests, bs4, telegram" >nul 2>&1
     if errorlevel 1 (
-        echo [*] Dependensi Python belum lengkap. Menginstal...
-        !VENV_PIP! install flask flask-cors requests beautifulsoup4 python-telegram-bot python-dotenv
+        echo [*] Installing required Python dependencies...
+        !VENV_PIP! install flask flask-cors requests beautifulsoup4 python-telegram-bot
         if errorlevel 1 (
             echo [-] Gagal menginstal dependensi Python!
             pause
