@@ -1203,8 +1203,8 @@ if ! $VENV_DIR/bin/python -c "$PY_IMPORT_CHECK" &> /dev/null; then
     
     # Hapus tool kompilasi (clang, llvm, make) di Termux setelah build selesai untuk menghemat memori
     if [ "$IS_TERMUX" = true ]; then
-        echo -e "${CYAN}[*] Membersihkan tool kompilasi (clang, llvm, make) untuk menghemat ruang penyimpanan...${RESET}"
-        pkg uninstall -y clang llvm make &>/dev/null
+        echo -e "${CYAN}[*] Membersihkan tool kompilasi otomatis (clang, llvm, make, dll) untuk menghemat ruang...${RESET}"
+        pkg uninstall -y clang llvm lld ndk-sysroot libcompiler-rt make pkg-config &>/dev/null
         apt-get autoremove -y &>/dev/null
         apt-get clean &>/dev/null
     fi
