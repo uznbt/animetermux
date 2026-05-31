@@ -1200,6 +1200,14 @@ if ! $VENV_DIR/bin/python -c "$PY_IMPORT_CHECK" &> /dev/null; then
     fi
     
     $VENV_DIR/bin/pip install $PY_DEPS
+    
+    # Hapus tool kompilasi (clang, llvm, make) di Termux setelah build selesai untuk menghemat memori
+    if [ "$IS_TERMUX" = true ]; then
+        echo -e "${CYAN}[*] Membersihkan tool kompilasi (clang, llvm, make) untuk menghemat ruang penyimpanan...${RESET}"
+        pkg uninstall -y clang llvm make &>/dev/null
+        apt-get autoremove -y &>/dev/null
+        apt-get clean &>/dev/null
+    fi
 fi
 
 # 3. Tunnel Configuration (Ngrok / Cloudflare)
