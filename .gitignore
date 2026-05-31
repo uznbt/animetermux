@@ -1,0 +1,44 @@
+# Node / Frontend
+frontend/node_modules/
+frontend/api
+frontend/public/
+frontend/src/
+frontend/eslint.config.js
+frontend/index.html
+frontend/package.json
+frontend/package-lock.json
+frontend/vite.config.js
+frontend/tailwind.config.js
+frontend/README.md
+frontend/package-lock.json
+frontend/package.json
+frontend/vite.config.js
+
+# Python / Backend
+backend/venv/
+backend/__pycache__/
+*.pyc
+backend/logs/
+backend/nginx.conf
+backend/nginx.pid
+backend/nginx_tmp/
+
+# Secrets / DB / Tunnels
+.env
+.chat_ids
+backend/.chat_ids
+.last_chat_id
+backend/.last_chat_id
+*.db
+backend/*.db
+ngrok
+ngrok.exe
+cloudflared
+cloudflared.exe
+.installed_packages.json
+# OS
+.DS_Store
+.installed_packages.json
+
+# Exclude install.bat
+install.bat
