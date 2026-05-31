@@ -4,10 +4,7 @@ echo "[*] Memulai setup Termux..."
 
 # 1. Update package dan install dependensi dasar
 pkg update -y
-pkg install -y fish git which termux-services gh curl python
-
-# 2. Install thefuck via pip (dibutuhkan agar plugin-thefuck bisa jalan)
-pip install thefuck
+pkg install -y fish git which termux-services
 
 # 3. Ganti default shell ke fish
 chsh -s fish
