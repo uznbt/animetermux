@@ -2,8 +2,8 @@
 
 echo "[*] Memulai setup Termux..."
 
-# 1. Update package dan install dependensi dasar
-pkg update -y
+# 1. Update daftar repositori saja (tanpa upgrade paksa)
+apt-get update
 pkg install -y fish git which termux-services
 
 # 3. Ganti default shell ke fish
