@@ -1,1 +1,0 @@
-import{_ as e}from"./index-clean-BWooRet_.js";var a=e("chevron-left",[["path",{d:"m15 18-6-6 6-6",key:"1wnfg3"}]]);export{a as t};
