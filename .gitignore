@@ -24,6 +24,7 @@ backend/logs/
 backend/nginx.conf
 backend/nginx.pid
 backend/nginx_tmp/
+backend/cache/
 
 # Secrets / DB / Tunnels
 .env
