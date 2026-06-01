@@ -676,8 +676,8 @@ prompt_autorun_mode() {
 
 select_and_open_link() {
     local options=()
-    options+=("1) Lokal (http://localhost:$HTTP_PORT)")
-    options+=("2) Lokal Jaringan (http://$LOCAL_IP:$HTTP_PORT)")
+    options+=("1) Lokal (${HTTP_PREFIX}://localhost:$HTTP_PORT)")
+    options+=("2) Lokal Jaringan (${HTTP_PREFIX}://$LOCAL_IP:$HTTP_PORT)")
     if [ -n "$PUBLIC_URL" ]; then
         options+=("3) Online Tunnel ($PUBLIC_URL)")
     fi
@@ -704,9 +704,9 @@ select_and_open_link() {
     # Extract target URL
     local target_url=""
     if [[ "$selected_option" == *"1)"* ]] || [[ "$selected_option" == "1" ]]; then
-        target_url="http://localhost:$HTTP_PORT"
+        target_url="${HTTP_PREFIX}://localhost:$HTTP_PORT"
     elif [[ "$selected_option" == *"2)"* ]] || [[ "$selected_option" == "2" ]]; then
-        target_url="http://$LOCAL_IP:$HTTP_PORT"
+        target_url="${HTTP_PREFIX}://$LOCAL_IP:$HTTP_PORT"
     elif { [[ "$selected_option" == *"3)"* ]] || [[ "$selected_option" == "3" ]]; }; then
         if [ -n "$PUBLIC_URL" ]; then
             target_url="$PUBLIC_URL"
@@ -1232,6 +1232,8 @@ elif [ "$DEF_TUNNEL" == "2" ]; then
     PROMPT_TUNNEL="2 (Cloudflare)"
 elif [ "$DEF_TUNNEL" == "3" ]; then
     PROMPT_TUNNEL="3 (Ngrok)"
+elif [ "$DEF_TUNNEL" == "4" ]; then
+    PROMPT_TUNNEL="4 (Lokal HTTPS)"
 fi
 
 if [ "$AUTO_RUN" == "true" ]; then
@@ -1243,6 +1245,7 @@ else
             "1) Tidak (Hanya lokal wifi/HP)"
             "2) Gunakan Cloudflare Tunnel (Gratis, Tanpa Daftar, Paling Mudah!)"
             "3) Gunakan Ngrok (Butuh Authtoken dari ngrok.com)"
+            "4) Lokal HTTPS (Self-Signed SSL) (Ada Peringatan Browser)"
         )
         selected_option=$(printf "%s\n" "${options[@]}" | fzf --height 9 --layout=reverse --border --prompt="Pilih akses online / tunneling [default: $PROMPT_TUNNEL]: " --header="AKSES BEDA JARINGAN (ONLINE / TUNNELING) CONFIG")
         if [ $? -eq 130 ]; then
@@ -1263,8 +1266,9 @@ else
         echo -e "1) Tidak (Hanya lokal wifi/HP)"
         echo -e "2) Gunakan Cloudflare Tunnel (Gratis, Tanpa Daftar, Paling Mudah!)"
         echo -e "3) Gunakan Ngrok (Butuh Authtoken dari ngrok.com)"
+        echo -e "4) Lokal HTTPS (Self-Signed SSL) (Ada Peringatan Browser)"
         echo -e ""
-        read -p "Masukkan pilihan Anda (1, 2, atau 3, atau Enter untuk $PROMPT_TUNNEL): " tunnel_pilihan
+        read -p "Masukkan pilihan Anda (1, 2, 3, atau 4, atau Enter untuk $PROMPT_TUNNEL): " tunnel_pilihan
         
         if [ -z "$tunnel_pilihan" ]; then
             tunnel_pilihan="$DEF_TUNNEL"
@@ -1279,10 +1283,14 @@ else
     fi
 fi
 
+HTTP_PREFIX="http"
 if [ "$tunnel_pilihan" == "2" ]; then
     TUNNEL_TYPE="cloudflare"
 elif [ "$tunnel_pilihan" == "3" ]; then
     TUNNEL_TYPE="ngrok"
+elif [ "$tunnel_pilihan" == "4" ]; then
+    TUNNEL_TYPE="local_https"
+    HTTP_PREFIX="https"
 fi
 
 # Setup Cloudflare Tunnel
@@ -1510,6 +1518,29 @@ generate_nginx_config() {
     mkdir -p "$ANIMETERMUX_DIR/backend/logs"
     mkdir -p "$ANIMETERMUX_DIR/backend/nginx_tmp"
     
+    NGINX_SSL_BLOCK=""
+    if [ "$TUNNEL_TYPE" == "local_https" ]; then
+        echo -e "${CYAN}[*] Mempersiapkan Sertifikat SSL Lokal (Self-Signed)...${RESET}"
+        if ! command -v openssl &>/dev/null; then
+            if command -v pkg &>/dev/null; then
+                pkg install openssl -y &>/dev/null
+                record_installed_package "openssl"
+            elif command -v apt-get &>/dev/null; then
+                sudo apt-get install openssl -y &>/dev/null
+            fi
+        fi
+        
+        if [ ! -f "$ANIMETERMUX_DIR/backend/nginx_tmp/server.crt" ]; then
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$ANIMETERMUX_DIR/backend/nginx_tmp/server.key" -out "$ANIMETERMUX_DIR/backend/nginx_tmp/server.crt" -subj "/C=ID/ST=Jawa/L=Jakarta/O=AnimeTermux/CN=$LOCAL_IP" &>/dev/null
+        fi
+        
+        NGINX_SSL_BLOCK="        listen $HTTP_PORT ssl;
+        ssl_certificate $ANIMETERMUX_DIR/backend/nginx_tmp/server.crt;
+        ssl_certificate_key $ANIMETERMUX_DIR/backend/nginx_tmp/server.key;"
+    else
+        NGINX_SSL_BLOCK="        listen $HTTP_PORT;"
+    fi
+    
     cat << EOF > "$ANIMETERMUX_DIR/backend/nginx.conf"
 $NGINX_USER_DIRECTIVE
 daemon off;
@@ -1550,7 +1581,7 @@ http {
     scgi_temp_path $ANIMETERMUX_DIR/backend/nginx_tmp/scgi;
 
     server {
-        listen $HTTP_PORT;
+$NGINX_SSL_BLOCK
         server_name localhost animetermux.com;
 
         location / {
@@ -1628,9 +1659,9 @@ if [ "$pilihan" == "2" ]; then
     echo -e "\n${GREEN}[+] Layanan berhasil dijalankan!${RESET}"
     echo -e "${CYAN}-------------------------------------------------------${RESET}"
     echo -e "${BOLD}   AKSES WEB STREAMING ANIME DI SINI:${RESET}"
-    echo -e "   Lokal Termux   : http://localhost:$HTTP_PORT"
-    echo -e "   Lokal Jaringan : http://$LOCAL_IP:$HTTP_PORT"
-    echo -e "   Domain Kustom  : http://animetermux.com:$HTTP_PORT"
+    echo -e "   Lokal Termux   : ${HTTP_PREFIX}://localhost:$HTTP_PORT"
+    echo -e "   Lokal Jaringan : ${HTTP_PREFIX}://$LOCAL_IP:$HTTP_PORT"
+    echo -e "   Domain Kustom  : ${HTTP_PREFIX}://animetermux.com:$HTTP_PORT"
     if [ -n "$PUBLIC_URL" ]; then
         echo -e "   ONLINE TUNNEL  : ${GREEN}${BOLD}$PUBLIC_URL${RESET}"
     fi
@@ -1749,9 +1780,9 @@ else
         
         echo -e "\n${CYAN}-------------------------------------------------------${RESET}"
         echo -e "${BOLD}   AKSES WEB STREAMING ANIME DI SINI:${RESET}"
-        echo -e "   Lokal Termux   : http://localhost:$HTTP_PORT"
-        echo -e "   Lokal Jaringan : http://$LOCAL_IP:$HTTP_PORT"
-        echo -e "   Domain Kustom  : http://animetermux.com:$HTTP_PORT"
+        echo -e "   Lokal Termux   : ${HTTP_PREFIX}://localhost:$HTTP_PORT"
+        echo -e "   Lokal Jaringan : ${HTTP_PREFIX}://$LOCAL_IP:$HTTP_PORT"
+        echo -e "   Domain Kustom  : ${HTTP_PREFIX}://animetermux.com:$HTTP_PORT"
         if [ -n "$PUBLIC_URL" ]; then
             echo -e "   ONLINE TUNNEL  : ${GREEN}${BOLD}$PUBLIC_URL${RESET}"
         fi
@@ -1804,9 +1835,9 @@ else
                 echo ""
                 echo -e "${CYAN}-------------------------------------------------------${RESET}"
                 echo -e "${BOLD}   AKSES WEB STREAMING ANIME DI SINI:${RESET}"
-                echo -e "   Lokal Termux   : http://localhost:$HTTP_PORT"
-                echo -e "   Lokal Jaringan : http://$LOCAL_IP:$HTTP_PORT"
-                echo -e "   Domain Kustom  : http://animetermux.com:$HTTP_PORT"
+                echo -e "   Lokal Termux   : ${HTTP_PREFIX}://localhost:$HTTP_PORT"
+                echo -e "   Lokal Jaringan : ${HTTP_PREFIX}://$LOCAL_IP:$HTTP_PORT"
+                echo -e "   Domain Kustom  : ${HTTP_PREFIX}://animetermux.com:$HTTP_PORT"
                 if [ -n "$PUBLIC_URL" ]; then
                     echo -e "   ONLINE TUNNEL  : ${GREEN}${BOLD}$PUBLIC_URL${RESET}"
                 fi
