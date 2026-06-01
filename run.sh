@@ -1531,12 +1531,19 @@ generate_nginx_config() {
         fi
         
         if [ ! -f "$ANIMETERMUX_DIR/backend/nginx_tmp/server.crt" ]; then
-            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$ANIMETERMUX_DIR/backend/nginx_tmp/server.key" -out "$ANIMETERMUX_DIR/backend/nginx_tmp/server.crt" -subj "/C=ID/ST=Jawa/L=Jakarta/O=AnimeTermux/CN=$LOCAL_IP" &>/dev/null
+            openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$ANIMETERMUX_DIR/backend/nginx_tmp/server.key" -out "$ANIMETERMUX_DIR/backend/nginx_tmp/server.crt" -subj "/C=ID/ST=Jawa/L=Jakarta/O=AnimeTermux/CN=$LOCAL_IP" > "$ANIMETERMUX_DIR/backend/logs/openssl_error.log" 2>&1
         fi
         
-        NGINX_SSL_BLOCK="        listen $HTTP_PORT ssl;
+        if [ -f "$ANIMETERMUX_DIR/backend/nginx_tmp/server.crt" ]; then
+            NGINX_SSL_BLOCK="        listen $HTTP_PORT ssl;
         ssl_certificate $ANIMETERMUX_DIR/backend/nginx_tmp/server.crt;
         ssl_certificate_key $ANIMETERMUX_DIR/backend/nginx_tmp/server.key;"
+        else
+            echo -e "${RED}[!] ERROR: Gagal membuat sertifikat SSL (OpenSSL error). Cek backend/logs/openssl_error.log${RESET}"
+            echo -e "${YELLOW}[*] Membatalkan opsi HTTPS dan memutar kembali ke HTTP biasa...${RESET}"
+            NGINX_SSL_BLOCK="        listen $HTTP_PORT;"
+            HTTP_PREFIX="http"
+        fi
     else
         NGINX_SSL_BLOCK="        listen $HTTP_PORT;"
     fi
