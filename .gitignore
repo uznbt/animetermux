@@ -13,6 +13,8 @@ frontend/README.md
 frontend/package-lock.json
 frontend/package.json
 frontend/vite.config.js
+.nomedia
+.autorun_prompted
 
 # Python / Backend
 backend/venv/
@@ -42,4 +44,3 @@ cloudflared.exe
 
 # Exclude install.bat
 install.bat
-.nomedia
