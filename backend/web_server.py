@@ -734,6 +734,27 @@ def parse_genres_html(html):
                 'name': a.text.strip(),
                 'slug': get_slug(href)
             })
+            
+    # Inject missing hidden genres that exist on Otakudesu but are omitted from their index
+    hidden_genres = [
+        {'name': 'Isekai', 'slug': 'isekai'},
+        {'name': 'Donghua', 'slug': 'donghua'},
+        {'name': 'Live Action', 'slug': 'live-action'},
+        {'name': 'Gore', 'slug': 'gore'},
+        {'name': 'Suspense', 'slug': 'suspense'},
+        {'name': 'Reincarnation', 'slug': 'reincarnation'},
+        {'name': 'Mahou Shoujo', 'slug': 'mahou-shoujo'},
+        {'name': 'Kids', 'slug': 'kids'}
+    ]
+    
+    existing_slugs = {g['slug'] for g in genres}
+    for hg in hidden_genres:
+        if hg['slug'] not in existing_slugs:
+            genres.append(hg)
+            
+    # Sort genres alphabetically by name
+    genres.sort(key=lambda x: x['name'].lower())
+    
     return genres
 
 def parse_genre_detail_html(html):
