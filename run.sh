@@ -29,6 +29,10 @@ fi
 
 # Check for Git Updates on Startup
 check_git_updates() {
+    if [ -f ".nomedia" ]; then
+        return
+    fi
+    
     if [ -d ".git" ] && command -v git &>/dev/null; then
         echo -e "${CYAN}[*] Memeriksa pembaruan dari repositori Git...${RESET}"
         
@@ -81,6 +85,11 @@ fi
 
 # Parse --uninstall flag
 if [ "$1" == "--uninstall" ]; then
+    if [ -f ".nomedia" ]; then
+        echo -e "${RED}[!] Gagal: Ini adalah folder AnimeTermux asli (terdapat file .nomedia). Fitur --uninstall dinonaktifkan untuk melindungi folder ini.${RESET}"
+        exit 1
+    fi
+
     echo -e "${YELLOW}[*] Menghapus paket yang diinstal oleh run.sh...${RESET}"
     if [ -f ".installed_packages.json" ]; then
         PKGS=$(grep -o '"[^"]*"' .installed_packages.json | tr -d '"')
