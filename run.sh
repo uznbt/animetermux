@@ -1523,8 +1523,8 @@ generate_nginx_config() {
         echo -e "${CYAN}[*] Mempersiapkan Sertifikat SSL Lokal (Self-Signed)...${RESET}"
         if ! command -v openssl &>/dev/null; then
             if command -v pkg &>/dev/null; then
-                pkg install openssl -y &>/dev/null
-                record_installed_package "openssl"
+                pkg install openssl-tool -y &>/dev/null
+                record_installed_package "openssl-tool"
             elif command -v apt-get &>/dev/null; then
                 sudo apt-get install openssl -y &>/dev/null
             fi
