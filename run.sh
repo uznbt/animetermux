@@ -1535,17 +1535,17 @@ generate_nginx_config() {
         fi
         
         if [ -f "$ANIMETERMUX_DIR/backend/nginx_tmp/server.crt" ]; then
-            NGINX_SSL_BLOCK="        listen $HTTP_PORT ssl;
+            NGINX_SSL_BLOCK="        listen 0.0.0.0:$HTTP_PORT ssl;
         ssl_certificate $ANIMETERMUX_DIR/backend/nginx_tmp/server.crt;
         ssl_certificate_key $ANIMETERMUX_DIR/backend/nginx_tmp/server.key;"
         else
             echo -e "${RED}[!] ERROR: Gagal membuat sertifikat SSL (OpenSSL error). Cek backend/logs/openssl_error.log${RESET}"
             echo -e "${YELLOW}[*] Membatalkan opsi HTTPS dan memutar kembali ke HTTP biasa...${RESET}"
-            NGINX_SSL_BLOCK="        listen $HTTP_PORT;"
+            NGINX_SSL_BLOCK="        listen 0.0.0.0:$HTTP_PORT;"
             HTTP_PREFIX="http"
         fi
     else
-        NGINX_SSL_BLOCK="        listen $HTTP_PORT;"
+        NGINX_SSL_BLOCK="        listen 0.0.0.0:$HTTP_PORT;"
     fi
     
     cat << EOF > "$ANIMETERMUX_DIR/backend/nginx.conf"
